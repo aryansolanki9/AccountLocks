@@ -1,0 +1,42 @@
+
+
+CREATE COMPUTE MODULE invoke_Account_Status_Event_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyMessageHeaders();
+		DECLARE strMapName CHARACTER 'applicationSAP';
+		SET Environment.Variables.mapName = strMapName;   
+		CALL readGlobalCacheValue(Environment.Variables.mapName, Environment.Variables.AccountID) INTO Environment.Variables.getValueResult; 
+		
+		IF EXISTS(Environment.Variables.getValueResult[]) THEN
+			SET Environment.Variables.CacheSet = 'FALSE';
+			CREATE LASTCHILD OF OutputRoot DOMAIN 'JSON' PARSE(CAST(Environment.Variables.getValueResult AS CHARACTER CCSID 1208));
+			SET OutputRoot.JSON.Data.IsCachedResponse = 'TRUE';
+			PROPAGATE TO TERMINAL 'out1';
+			RETURN FALSE;
+		ELSE 
+			SET Environment.Variables.CacheSet = 'TRUE';
+			RETURN TRUE;
+		END IF;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+END MODULE; 
+
+CREATE PROCEDURE readGlobalCacheValue(IN strMapName CHARACTER, IN mapKey CHARACTER)
+RETURNS CHARACTER  
+LANGUAGE JAVA
+EXTERNAL NAME "Utilities.CacheUtil.readfromCache"; 
+ 
+CREATE PROCEDURE writeGlobalCacheValue(IN strMapName CHARACTER, IN mapKey CHARACTER, IN strSoRResponse CHARACTER)
+LANGUAGE JAVA
+EXTERNAL NAME "Utilities.CacheUtil.writeToCache";
+

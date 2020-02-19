@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:getSAPResponse.subflow="getSAPResponse.subflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="invoke_Account_Status_Event.subflow" nsPrefix="invoke_Account_Status_Event.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" useDefaults="true" udpSupport="true">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="invoke_Account_Status_Event" bundleName="invoke_Account_Status_Event" pluginId="AccountLocks_v2_0_Get"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/AccountLocks_v2_0_Get/icons/full/obj16/invoke_Account_Status_Event.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/AccountLocks_v2_0_Get/icons/full/obj30/invoke_Account_Status_Event.gif"/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="61,157">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="invoke_Account_Status_Event" pluginId="AccountLocks_v2_0_Get"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output" location="557,58">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Output" bundleName="invoke_Account_Status_Event" pluginId="AccountLocks_v2_0_Get"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="166,157" computeExpression="esql://routine/#invoke_Account_Status_Event_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="CheckGlobalCache"/>
+      </nodes>
+      <nodes xmi:type="getSAPResponse.subflow:FCMComposite_1" xmi:id="FCMComposite_1_2" location="312,58">
+        <translation xmi:type="utility:ConstantString" string="getSAPResponse"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_1" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="OutTerminal.Output" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.in">
+        <bendPoints>247,-15,-63,84</bendPoints>
+      </connections>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="OutTerminal.Output" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

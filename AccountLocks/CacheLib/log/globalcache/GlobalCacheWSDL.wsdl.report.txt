@@ -1,0 +1,25 @@
+
+
+Importing file: D:\wsdl\GlobalCacheWSDL.wsdl
+
+The WSDL import will proceed with bindings GlobalCacheHttpBinding.
+Creating wsdl schema document for file:///D:/wsdl/GlobalCacheWSDL.wsdl.
+Parsing wsdl binding {http://GlobalCache}GlobalCacheHttpBinding.
+Parsing wsdl binding input setMyGlobalCache.
+Parsing wsdl binding output setMyGlobalCache.
+Parsing wsdl binding input getMyGlobalCache.
+Parsing wsdl binding output getMyGlobalCache.
+Processing doc style for operation setMyGlobalCache.
+Processing doc style for operation getMyGlobalCache.
+Populating WSDL schema GlobalCacheWSDL.xsd.
+Creating file GlobalCacheWSDL.xsd in the workspace.
+Creating file /CacheLib/GlobalCache_InlineSchema1.xsd in the workspace.
+Copying source WSDL GlobalCacheWSDL.wsdl to GlobalCacheWSDL.wsdl.
+
+Elapsed time processing this message definition file: 0.386 seconds
+Number of warnings for this message definition file: 0
+
+
+Number of files processed: 1
+
+

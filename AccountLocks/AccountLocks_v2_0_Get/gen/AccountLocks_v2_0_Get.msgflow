@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmLabel.msgnode="ComIbmLabel.msgnode" xmlns:ComIbmRouteToLabel.msgnode="ComIbmRouteToLabel.msgnode" xmlns:ComIbmWSInput.msgnode="ComIbmWSInput.msgnode" xmlns:ComIbmWSReply.msgnode="ComIbmWSReply.msgnode" xmlns:CommonLibrary_catchHandler.subflow="CommonLibrary/catchHandler.subflow" xmlns:Logger_createLog.subflow="Logger/createLog.subflow" xmlns:audit_createAudit.subflow="audit/createAudit.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:get.subflow="get.subflow" xmlns:header_copyheader_Log.subflow="header/copyheader_Log.subflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="gen/AccountLocks_v2_0_Get.msgflow" nsPrefix="gen_AccountLocks_v2_0_Get.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="AccountLocks_v2_0_Get" bundleName="gen/AccountLocks_v2_0_Get" pluginId="AccountLocks_v2_0_Get"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/AccountLocks_v2_0_Get/icons/full/obj16/AccountLocks_v2_0_Get.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/AccountLocks_v2_0_Get/icons/full/obj30/AccountLocks_v2_0_Get.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmWSInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="89,90" URLSpecifier="/account-locks/v2*" parseQueryString="true" messageDomainProperty="JSON" faultFormat="HTML">
+        <translation xmi:type="utility:ConstantString" string="HTTP Input"/>
+      </nodes>
+      <nodes xmi:type="ComIbmRouteToLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="383,87">
+        <translation xmi:type="utility:ConstantString" string="Route To Label"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSReply.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="841,319">
+        <translation xmi:type="utility:ConstantString" string="HTTP Reply"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="108,322" labelName="get">
+        <translation xmi:type="utility:ConstantString" string="get (Label)"/>
+      </nodes>
+      <nodes xmi:type="get.subflow:FCMComposite_1" xmi:id="FCMComposite_1_5" location="501,323">
+        <translation xmi:type="utility:ConstantString" string="get (Implementation)"/>
+      </nodes>
+      <nodes xmi:type="CommonLibrary_catchHandler.subflow:FCMComposite_1" xmi:id="FCMComposite_1_6" location="223,206">
+        <translation xmi:type="utility:ConstantString" string="catchHandler"/>
+      </nodes>
+      <nodes xmi:type="header_copyheader_Log.subflow:FCMComposite_1" xmi:id="FCMComposite_1_7" location="212,322">
+        <translation xmi:type="utility:ConstantString" string="copyheader_Log"/>
+      </nodes>
+      <nodes xmi:type="audit_createAudit.subflow:FCMComposite_1" xmi:id="FCMComposite_1_8" location="383,322" auditType="AL_Get_Input" isJournal="0" contexId="1234567789012345">
+        <translation xmi:type="utility:ConstantString" string="createAudit"/>
+      </nodes>
+      <nodes xmi:type="Logger_createLog.subflow:FCMComposite_1" xmi:id="FCMComposite_1_9" location="684,266" logPosition="P4" logLevel="debug">
+        <translation xmi:type="utility:ConstantString" string="P4"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.timeout" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.Input_1"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.Output_1" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

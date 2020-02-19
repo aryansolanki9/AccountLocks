@@ -1,0 +1,63 @@
+BROKER SCHEMA Logger
+
+DECLARE logPosition,logLevel,sourceSystemIdXpath EXTERNAL CHARACTER '';
+CREATE COMPUTE MODULE createLog_createLogRequest
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+	
+	DECLARE msgString CHARACTER '';
+	SET msgString	= logLevel ||','||logPosition;
+
+	IF UPPER(logPosition)='P1' THEN
+		SET msgString = msgString ||',' ||COALESCE(Environment.rest.header,'')||',operation:' ||COALESCE(Environment.rest.operation,'') ||',URI:' ||COALESCE(Environment.rest.URI,'');  
+	END IF;
+	
+	IF UPPER(logPosition)='P2' THEN
+--		 DECLARE bodyBlob BLOB ASBITSTREAM(InputLocalEnvironment.Destination); 
+--		 DECLARE bodyAsChar CHAR CAST(bodyBlob AS CHAR CCSID 1208);
+		SET msgString = msgString ||',operation:' ||COALESCE(Environment.rest.operation,'') ||',destination loop back id:' ||COALESCE(InputLocalEnvironment.Destination.Loopback.Request.id,'');  
+	END IF;	
+	
+	IF UPPER(logPosition)='P3' THEN
+		SET msgString = msgString||',ResponseHeader:'||COALESCE(InputRoot.HTTPResponseHeader,'');
+	END IF;
+	
+	IF UPPER(logPosition)='P4' THEN
+		SET msgString = msgString||',ResponseHeader:'||COALESCE(InputRoot.HTTPResponseHeader,'');
+	END IF;
+	
+	IF UPPER(logPosition)='P5' THEN
+		create LASTCHILD of Environment DOMAIN 'XMLNSC' name 'ExceptionList';
+		set Environment.ExceptionList= InputExceptionList;
+		
+		DECLARE bodyBlob BLOB ASBITSTREAM(Environment.ExceptionList); 
+		 DECLARE bodyAsChar CHARACTER CAST(bodyBlob AS CHARACTER CCSID 1208);
+		
+		SET msgString = msgString ||',' ||COALESCE(Environment.rest.header,'')||COALESCE(Environment.rest.header,'')||',operation:' ||COALESCE(Environment.rest.operation,'') ||',URI:' ||COALESCE(Environment.rest.URI,'')||',Error:'||COALESCE(bodyAsChar,'');  
+	END IF;
+	IF(LOWER(logLevel)='debug') THEN
+		 DECLARE bodyBlob BLOB ASBITSTREAM(InputRoot); 
+		 DECLARE bodyAsChar CHAR CAST(bodyBlob AS CHAR CCSID 1208);
+		SET msgString = msgString||',Body:'||COALESCE(bodyAsChar,'');
+	END IF;
+
+---
+
+
+
+ Set OutputRoot.BLOB.BLOB = CAST(msgString AS BLOB CCSID 1208);
+	
+	END;
+END MODULE;
+
+
+
+CREATE COMPUTE MODULE createLog_exception
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+	SET OutputExceptionList = InputExceptionList;
+	RETURN FALSE;
+
+	END;
+END MODULE;
+

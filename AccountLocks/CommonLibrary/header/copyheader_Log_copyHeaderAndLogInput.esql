@@ -1,0 +1,50 @@
+BROKER SCHEMA header
+
+
+CREATE COMPUTE MODULE copyheader_Log_copyHeaderAndLogInput
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+			
+	DECLARE msgString CHARACTER '';	
+	DECLARE refRestHeader REFERENCE TO InputLocalEnvironment.REST.Input.Parameters;
+	MOVE refRestHeader FIRSTCHILD;
+	WHILE  LASTMOVE (refRestHeader) DO
+		
+		SET Environment.{FIELDNAME(refRestHeader)}	=	refRestHeader;
+		IF(msgString='')THEN 
+			SET msgString=FIELDNAME(refRestHeader)||':' ||COALESCE(refRestHeader,'');
+		ELSE
+			SET msgString=msgString||','||FIELDNAME(refRestHeader)||':' ||COALESCE(refRestHeader,'');
+		END IF;
+	MOVE refRestHeader NEXTSIBLING REPEAT TYPE;	
+		
+	END WHILE;
+	SET Environment.rest.header			=	msgString;
+	SET Environment.rest.operation		= 	InputLocalEnvironment.REST.Input.Operation;
+	SET Environment.rest.URI			=	InputLocalEnvironment.REST.Input.URI;
+	SET Environment.rest.application	=	ApplicationLabel;
+	
+--	DECLARE refAdditionalInfo,refadd REFERENCE TO Environment."x-AdditionalInfo";
+--	DECLARE conentFlag BOOLEAN FALSE;
+--	IF refAdditionalInfo IS NOT NULL THEN
+--		SET conentFlag = TRUE;
+--	END IF;	
+--	WHILE conentFlag DO
+--	CREATE LASTCHILD OF Environment.rest as refadd NAME 'AdditionalInfo' ;	
+--	IF refAdditionalInfo IS NOT NULL THEN
+--		SET conentFlag = TRUE;
+--		SET refadd.name  = SUBSTRING(refAdditionalInfo BEFORE '');
+--		SET refadd.value = SUBSTRING(refAdditionalInfo BETWEEN '' AND  ',');
+--	END IF;
+	
+--	END WHILE;	
+	
+	
+
+	
+	
+	
+	SET OutputRoot=InputRoot;
+	
+	END;
+END MODULE;

@@ -1,0 +1,20 @@
+BROKER SCHEMA CommonLibrary
+
+
+CREATE COMPUTE MODULE catchHandler_createErrorMsg
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.Properties=InputRoot.Properties;
+		SET OutputRoot.Properties.ContentType = 'application/json;charset = utf-8';
+		SET OutputRoot.Properties.CodedCharSetId = '1208';
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+
+		DECLARE refToOut	REFERENCE TO OutputRoot;
+		
+			CREATE FIELD OutputRoot.JSON.Data.errors IDENTITY (JSON.Array)errors;
+			CREATE LASTCHILD OF OutputRoot.JSON.Data.errors AS refToOut Name 'Item';
+			SET refToOut.code = '404';
+			SET refToOut.message = 'Invalid Response';
+			SET refToOut.logErrorId = '76678787';
+	END;
+END MODULE;

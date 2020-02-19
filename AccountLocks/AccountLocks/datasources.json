@@ -1,0 +1,10 @@
+{
+"mongodb":  {
+    "host": "mongo-service",
+	"port": "27017",
+	"database": "accountLocks",
+	"name": "mongodb",
+	"connector": "mongodb",
+	"debug": true
+	}
+}	

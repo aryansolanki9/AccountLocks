@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmFilter.msgnode="ComIbmFilter.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:invoke_Account_Status_Event.subflow="invoke_Account_Status_Event.subflow" xmlns:invoke_TSYS.subflow="invoke_TSYS.subflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="get.subflow" nsPrefix="get.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="get" bundleName="get" pluginId="AccountLocks_v2_0_Get"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/AccountLocks_v2_0_Get/icons/full/obj16/get.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/AccountLocks_v2_0_Get/icons/full/obj30/get.gif"/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input_1" location="46,180">
+        <translation xmi:type="utility:TranslatableString" key="Input" bundleName="get" pluginId="AccountLocks_v2_0_Get"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output_1" location="1044,175">
+        <translation xmi:type="utility:TranslatableString" key="Output" bundleName="get" pluginId="AccountLocks_v2_0_Get"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="177,180" computeExpression="esql://routine/#get_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="SetEnvironment"/>
+      </nodes>
+      <nodes xmi:type="ComIbmFilter.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="417,180" filterExpression="esql://routine/#get_Filter.Main">
+        <translation xmi:type="utility:ConstantString" string="SoR_Routing"/>
+      </nodes>
+      <nodes xmi:type="invoke_Account_Status_Event.subflow:FCMComposite_1" xmi:id="FCMComposite_1_4" location="607,73">
+        <translation xmi:type="utility:ConstantString" string="invoke_SAP"/>
+      </nodes>
+      <nodes xmi:type="invoke_TSYS.subflow:FCMComposite_1" xmi:id="FCMComposite_1_5" location="621,276">
+        <translation xmi:type="utility:ConstantString" string="invoke_TSYS"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="839,174" computeExpression="esql://routine/#updateGlobalCache_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="UpdateGlobalCache"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_1" sourceNode="InTerminal.Input_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.false" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.true" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="OutTerminal.Output_1" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://GlobalCache" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:tns="http://GlobalCache">
+	
+	<xsd:element ibmSchExtn:docRoot="true" name="SetGlobalCache">
+		<xsd:complexType>
+			<xsd:sequence>
+					<xsd:element maxOccurs="1" minOccurs="1" name="Maps">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element maxOccurs="unbounded" minOccurs="1" name="Map">
+									<xsd:complexType>
+										<xsd:sequence>
+											<xsd:element maxOccurs="unbounded" minOccurs="1" name="Entry">
+											</xsd:element>
+										</xsd:sequence>
+										<xsd:attribute name="name" type="xsd:string"/>
+									</xsd:complexType>
+								</xsd:element>
+							</xsd:sequence>
+						</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element ibmSchExtn:docRoot="true" name="SetGlobalCacheResponse">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Result" nillable="true" type="xsd:string"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element ibmSchExtn:docRoot="true" name="GetGlobalCache">
+		<xsd:complexType>
+			<xsd:sequence>
+					<xsd:element minOccurs="1" name="Map" type="xsd:string"/>
+					<xsd:element maxOccurs="unbounded" minOccurs="0" name="Key" type="xsd:string"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element ibmSchExtn:docRoot="true" name="GetGlobalCacheResponse">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element maxOccurs="1" minOccurs="0" name="Map">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element maxOccurs="unbounded" minOccurs="0" name="Entry"/>
+						</xsd:sequence>
+						<xsd:attribute name="name" type="xsd:string"/>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

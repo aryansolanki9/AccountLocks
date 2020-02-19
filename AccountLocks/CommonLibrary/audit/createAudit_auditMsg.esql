@@ -1,0 +1,47 @@
+BROKER SCHEMA audit
+
+DECLARE contexId,auditType,isJournal EXTERNAL CHARACTER '';
+CREATE COMPUTE MODULE createAudit_auditMsg
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE refAuditMsg,refAppHeader,refauditInfo,refmsgInfo,refchlInfo,refadditionalInfo,refappGatewayInfo,refEventData REFERENCE TO OutputRoot;
+		SET OutputRoot.Properties=InputRoot.Properties;
+		SET OutputRoot.Properties.ContentType = 'application/json;charset = utf-8';
+		SET OutputRoot.Properties.CodedCharSetId = '1208';	
+		CREATE FIELD OutputRoot.JSON.Data;
+		CREATE LASTCHILD OF OutputRoot.JSON.Data As refAuditMsg NAME 'createAuditData' ;
+		CREATE LASTCHILD OF refAuditMsg  As refAppHeader 		NAME 'appHeader' ;
+		CREATE LASTCHILD OF refAppHeader As refmsgInfo 		 	NAME 'msgInfo' ;
+			SET refmsgInfo.journeykey 	   = COALESCE(Environment."x-JourneyID",UUIDASCHAR);
+			SET refmsgInfo.sourceSystemKey = 'ESB';
+			SET refmsgInfo.dateTime 	   = CURRENT_GMTTIMESTAMP;
+		CREATE LASTCHILD OF refAppHeader As refchlInfo 		  	NAME 'chlInfo' ;
+			SET refchlInfo.chlName		   = Environment."x-Channel";
+			
+			CREATE FIELD refAuditMsg.appHeader.additionalInfo IDENTITY (JSON.Array)additionalInfo;
+			CREATE LASTCHILD OF refAuditMsg.appHeader.additionalInfo AS refadditionalInfo NAME 'Item' ;
+				SET refadditionalInfo.name		   = 'name';
+				SET refadditionalInfo.value		   = 'value';
+		CREATE LASTCHILD OF refAppHeader As refappGatewayInfo 	NAME 'appGatewayInfo' ;
+			SET refappGatewayInfo.env		   = Environment."x-VirtualEnvironment";
+			SET refappGatewayInfo.version	   = Environment."x-SchemaVersion";
+			
+		CREATE LASTCHILD OF refAuditMsg As refauditInfo NAME 'auditInfo' ;
+		
+			SET refauditInfo.contexId 		   =	contexId;
+			SET refauditInfo.originatingSource =	Environment."x-SourceSystemID";
+			SET refauditInfo.eventSource 	   =	'ESB';
+			SET refauditInfo.auditTypeId 	   =	auditType;
+			SET refauditInfo.eventTimestamp	   =	CURRENT_GMTTIMESTAMP;
+			SET refauditInfo.isJournal 		   =	isJournal;
+			SET refauditInfo.appName 		   =	Environment.rest.application;
+		
+		CREATE FIELD refAuditMsg.auditInfo.eventData IDENTITY (JSON.Array)eventData;
+			CREATE LASTCHILD OF refAuditMsg.auditInfo.eventData AS refEventData NAME 'Item' ;
+			SET refEventData.name		   = 'name';
+			SET refEventData.value		   = 'value';
+		
+		
+		
+	END;
+END MODULE;

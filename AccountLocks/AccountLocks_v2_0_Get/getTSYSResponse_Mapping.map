@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0" xmlns:map="default">
+    <inlinedXMLSchema><![CDATA[<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">   
+    <xsd:element name="AccountID" type="xsd:string"/>   
+</xsd:schema>]]></inlinedXMLSchema>
+    <input path="jar:file://!com/ibm/etools/mft/map/xsds/assembly/Environment.xsd" var="var1"/>
+    <input path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd" var="var2"/>
+    <input inlinedXMLSchema="true" path="../schema_0.xsd" var="var"/>
+    <output path="jar:file://!com/ibm/etools/mft/map/xsds/assembly/Environment.xsd" var="var3"/>
+    <output path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd" var="var4"/>
+    <namespaces>
+        <namespace kind="extension" prefix="fn" uri="http://www.w3.org/2005/xpath-functions"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="getTSYSResponse_Mapping">
+        <input path="$var1/mb:env(Environment)" var="Environment">
+            <cast castType="userDefined" path="$Environment/Variables/any" qualifier="AccountID" ref="var" var="any"/>
+        </input>
+        <input path="$var2/mb:msg(BLOB,assembly,BLOB,LocalEnvironment,Properties)" var="MessageAssembly"/>
+        <output path="$var3/mb:env(Environment)" var="Environment1">
+            <cast castType="userDefined" path="$Environment1/Variables/any" qualifier="AccountID" ref="var" var="any1"/>
+        </output>
+        <output path="$var4/mb:msg(BLOB,assembly,BLOB,LocalEnvironment,Properties)" var="MessageAssembly1"/>
+        <passthrough>
+            <input path="$Environment/."/>
+            <output path="$Environment1/."/>
+            <updates/>
+        </passthrough>
+        <move>
+            <input path="$MessageAssembly/Properties"/>
+            <output path="$MessageAssembly1/Properties"/>
+        </move>
+        <function ref="fn:concat">
+            <input path="$Environment/Variables/AccountID" var="AccountID"/>
+            <output path="$MessageAssembly1/LocalEnvironment/Destination/Loopback/Request/filter/where"/>
+            <param name="string1" value="'{&quot;and&quot;: [{&quot;accountId&quot;: {&quot;eq&quot;:&quot;'"/>
+            <param name="string2" value="$AccountID"/>
+            <param name="string3" value="'&quot;}}]}'"/>
+        </function>
+    </mappingDeclaration>
+</mappingRoot>

@@ -1,0 +1,655 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "title" : "Account locks APIs",
+    "description" : "This service retrieves account locks for SAP Current Accounts, SAP Savings Accounts and Credit Cards. Locks for SAP current accounts and SAP Savings accounts will be retrieved from SAP. Credit cards locks will be retrieved from TSYS. This service will return credit card locks from alternate SoR, if TSYS is down.",
+    "version" : "v2.0"
+  },
+  "basePath" : "/account-locks/v2",
+  "schemes" : [ "https" ],
+  "consumes" : [ "application/json; charset=utf-8" ],
+  "produces" : [ "application/json; charset=utf-8" ],
+  "parameters" : {
+    "Additional-Info" : {
+      "in" : "header",
+      "name" : "X-Additional-Info",
+      "type" : "array",
+      "items" : {
+        "type" : "string",
+        "pattern" : "^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$",
+        "minLength" : 3,
+        "maxLength" : 121
+      },
+      "required" : false,
+      "collectionFormat" : "csv",
+      "description" : "This object holds information in addition to the other header fields below. The strings should be populated in a name/value pair format as follows; [\"ProcessID 123456789\", \"ParentProcessID 66213\"]. Name value pair is separated by a blank space character. Name must not contain a space but the value may contain.\n\nThe values within the identifier should meet the criteria below\n  string max length of 121 and pattern of\n  ^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$\nThis pattern means 2 strings of sepparated by 1 delimiting space character.\nThe first string is for the name and  the second for the value.\nThe second string accepts spaces, but the first don't.\n"
+    },
+    "Channel" : {
+      "in" : "header",
+      "name" : "X-Channel",
+      "type" : "string",
+      "minLength" : 2,
+      "maxLength" : 25,
+      "required" : true,
+      "pattern" : "^[\\sa-zA-Z0-9,_'\\.\\-]*$",
+      "description" : "Please refer TMS domain 'BusinessTransactionCommunicationChannelCode' for the  list of possible values. Sample Values include\nPOST OFFICE\nINTERNET\nMOBILE\n"
+    },
+    "Channel-Alternate-Id" : {
+      "in" : "header",
+      "name" : "X-Channel-Alternate-Id",
+      "type" : "array",
+      "items" : {
+        "type" : "string",
+        "pattern" : "^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$",
+        "minLength" : 3,
+        "maxLength" : 121
+      },
+      "required" : false,
+      "collectionFormat" : "csv",
+      "description" : "This string holds the channel alternate identifiers. It contains sub-strings that should be populated in a name/value pair format as follows. 'name value' for example [\"MACHINEID 123.123.123.123\", \"CUSTOMERID 1234567891\"]. Name value pair is separated by a blank space character. Name must not contain a space but the value may contain.\n\nThe following values are allowed for name\nCASHIERID\nCUSTOMERID\nEMPLOYEEID\nMACHINEID\nTERMINALID\nUSERID\nFUNCTIONALUNITID\n\nThe values within the identifier should meet the criteria below\n  string max length of 121 and pattern of\n  ^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$\nThis pattern means 2 strings of separated by 1 delimiting space character.\nThe first string is for the type and  the second for the identifier.\nThe second string accepts spaces, but the first don't.\n"
+    },
+    "Virtual-Environment" : {
+      "in" : "header",
+      "name" : "X-Virtual-Environment",
+      "type" : "string",
+      "minLength" : 1,
+      "maxLength" : 20,
+      "required" : true,
+      "pattern" : "^[A-Z0-9,\\.\\-]*$",
+      "description" : "Where a project shares environments with other projects, this field is used to create a \"virtual environment\". Consumers can pass this such that the service gateway routes to a project specific version.  The main purpose of this field is to aid testing and production proving.  Once the service is live and proven, it typically no longer serves a purpose.\n\nExample value \"OBIR3-SEPT\".\n"
+    },
+    "Schema-Version" : {
+      "in" : "header",
+      "name" : "X-Schema-Version",
+      "type" : "string",
+      "enum" : [ "2.0" ],
+      "required" : true,
+      "description" : "This is a way for the consumer to communicate what version of the specification it has. For example a consumer may still operate using v1.0 while the service is at v1.1 (at which point \"1.1\" will be added to the enumeration above, only use numeric values in the enumeration with single quotes).\n\nThis field is used for two purposes\n  - it will allow the service to ensure the consumer receives a compatible response\n  - we can deploy a new minor version alongside an existing minor version, and route the service to either based on this field (and other info).  Based on testing / proving the service will ultimately switch to the final version.\n"
+    },
+    "Journey-Id" : {
+      "in" : "header",
+      "name" : "X-Journey-Id",
+      "type" : "string",
+      "minLength" : 36,
+      "maxLength" : 36,
+      "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+      "required" : false,
+      "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+    },
+    "Source-System-Id" : {
+      "in" : "header",
+      "name" : "X-Source-System-Id",
+      "type" : "string",
+      "minLength" : 1,
+      "maxLength" : 60,
+      "required" : true,
+      "pattern" : "^[\\sa-zA-Z0-9,_'\\.\\-]*$",
+      "description" : "Please refer TMS domain 'BusinessSystemID' for the  list of possible values. Sample Values include\nDISCOVERY\nBASE24\nCIS\n"
+    },
+    "Create-Date-Time" : {
+      "in" : "header",
+      "name" : "X-Create-Date-Time",
+      "type" : "string",
+      "format" : "date-time",
+      "required" : true,
+      "description" : "Time stamp associated with creation of the request message, utilisting the UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+    },
+    "IP-Address" : {
+      "in" : "header",
+      "name" : "X-IP-Address",
+      "type" : "string",
+      "minLength" : 7,
+      "maxLength" : 39,
+      "required" : false,
+      "pattern" : "^[a-fA-F0-9:\\.]*$",
+      "description" : "The IPv4/IPv6 address of the caller."
+    },
+    "involvedPartyId" : {
+      "in" : "query",
+      "name" : "involvedPartyId",
+      "type" : "string",
+      "minLength" : 1,
+      "maxLength" : 10,
+      "pattern" : "^\\d{1,10}$",
+      "description" : "Specifies the unique Identifier used to identify an InvolvedParty. This field is required to retrieve account locks from 'alternate SoR' when credit card system is down.\n"
+    },
+    "accountId" : {
+      "in" : "path",
+      "name" : "accountId",
+      "description" : "Account Id in Account Number and Sort Code format for SAP accounts OR TSYS account Id for retrieving Credit Card locks",
+      "required" : true,
+      "type" : "string",
+      "minLength" : 1,
+      "maxLength" : 28,
+      "pattern" : "^[\\sa-zA-Z\\d\\-\\/]*$"
+    }
+  },
+  "responses" : {
+    "400" : {
+      "description" : "Bad Request",
+      "headers" : {
+        "X-Journey-Id" : {
+          "type" : "string",
+          "minLength" : 36,
+          "maxLength" : 36,
+          "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+          "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+        },
+        "X-Create-Date-Time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Errors"
+      }
+    },
+    "401" : {
+      "description" : "Unauthorized"
+    },
+    "403" : {
+      "description" : "Forbidden"
+    },
+    "404" : {
+      "description" : "Not Found",
+      "headers" : {
+        "X-Journey-Id" : {
+          "type" : "string",
+          "minLength" : 36,
+          "maxLength" : 36,
+          "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+          "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+        },
+        "X-Create-Date-Time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Errors"
+      }
+    },
+    "405" : {
+      "description" : "Method Not Allowed"
+    },
+    "406" : {
+      "description" : "Not Acceptable"
+    },
+    "429" : {
+      "description" : "Too Many Requests"
+    },
+    "500" : {
+      "description" : "Internal Server Error",
+      "headers" : {
+        "X-Journey-Id" : {
+          "type" : "string",
+          "minLength" : 36,
+          "maxLength" : 36,
+          "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+          "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+        },
+        "X-Create-Date-Time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Errors"
+      }
+    },
+    "501" : {
+      "description" : "Not Implemented",
+      "schema" : {
+        "$ref" : "#/definitions/Errors"
+      }
+    },
+    "503" : {
+      "description" : "Service Unavailable",
+      "headers" : {
+        "X-Journey-Id" : {
+          "type" : "string",
+          "minLength" : 36,
+          "maxLength" : 36,
+          "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+          "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+        },
+        "X-Create-Date-Time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Errors"
+      }
+    },
+    "504" : {
+      "description" : "Gateway Timeout",
+      "headers" : {
+        "X-Journey-Id" : {
+          "type" : "string",
+          "minLength" : 36,
+          "maxLength" : 36,
+          "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+          "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+        },
+        "X-Create-Date-Time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+        }
+      },
+      "schema" : {
+        "$ref" : "#/definitions/Errors"
+      }
+    },
+    "ResponsesHeaders" : {
+      "description" : "The response header parameters are common across all NEM resources.",
+      "headers" : {
+        "X-Journey-Id" : {
+          "type" : "string",
+          "minLength" : 36,
+          "maxLength" : 36,
+          "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+          "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+        },
+        "X-Create-Date-Time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+        }
+      }
+    }
+  },
+  "security" : [ {
+    "JWT" : [ ]
+  } ],
+  "securityDefinitions" : {
+    "JWT" : {
+      "name" : "Authorization",
+      "type" : "apiKey",
+      "in" : "header"
+    }
+  },
+  "definitions" : {
+    "Errors" : {
+      "type" : "object",
+      "required" : [ "errors" ],
+      "properties" : {
+        "errors" : {
+          "type" : "array",
+          "description" : "This block wraps either field level error or the error returned by the provider service and returned as a custom error. In case of multiple service invocation failure, all error will be wrapped and return for consumer to make decision and compose more meaningful message as desired.",
+          "items" : {
+            "$ref" : "#/definitions/Error"
+          },
+          "default" : [ ]
+        }
+      },
+      "example" : {
+        "errors" : [ {
+          "code" : "NEM.ESB.ACTLCK.400.000",
+          "message" : "The Schema Rules Validation Failed for <Field Name>.",
+          "logErrorId" : "c9cd35a4-8cf8-4b9c-90e5-299aea597024"
+        }, {
+          "code" : "NEM.ESB.ACTLCK.400.001",
+          "message" : "A Required Field JourneyId is missing",
+          "logErrorId" : "c9cd35a4-8cf8-4b9c-90e5-299aea597025"
+        } ]
+      }
+    },
+    "Error" : {
+      "type" : "object",
+      "description" : "Error code and message will be used to communicate failure to consumer. This block provides the ability to create internal error code and message communicating the causes of the error. Validation errors for GET, PUT, PATCH and POST requests will need a field breakdown. This is best modelled by using an error code for validation failures and providing the detailed errors message in error message field.",
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "string",
+          "description" : "A custom error code returned by the API for the consumer interested in fine-grained error handling. In the case where HTTP response code is too generic to provide specific treatment by the consumer, custom code can be used to handle specific error condition based on the provider services error condition. For example UI might want to show list of field error by name. Each interface specification specifies which errors this API can return."
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "It provides information application-specific errors returned by provider service or description of class of error returned by the API for example validation error."
+        },
+        "logErrorId" : {
+          "type" : "string",
+          "format" : "uuid",
+          "description" : "An unique reference for every error being logged."
+        }
+      },
+      "example" : {
+        "Errors" : [ {
+          "code" : "NEM.ESB.ACTLCK.400.001",
+          "message" : "The field <Element Name> is mandatory",
+          "logErrorId" : "c9cd35a4-8cf8-4b9c-90e5-299aea597024"
+        } ]
+      }
+    }
+  },
+  "paths" : {
+    "/{accountId}/locks" : {
+      "get" : {
+        "summary" : "Get Account Locks",
+        "description" : "Get locks related to an account. The API provides all account hold information related to the Account. When no account hold found for the provide account, the API will return empty lock array.",
+        "operationId" : "get",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-Additional-Info",
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "pattern" : "^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$",
+            "minLength" : 3,
+            "maxLength" : 121
+          },
+          "required" : false,
+          "collectionFormat" : "csv",
+          "description" : "This object holds information in addition to the other header fields below. The strings should be populated in a name/value pair format as follows; [\"ProcessID 123456789\", \"ParentProcessID 66213\"]. Name value pair is separated by a blank space character. Name must not contain a space but the value may contain.\n\nThe values within the identifier should meet the criteria below\n  string max length of 121 and pattern of\n  ^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$\nThis pattern means 2 strings of sepparated by 1 delimiting space character.\nThe first string is for the name and  the second for the value.\nThe second string accepts spaces, but the first don't.\n"
+        }, {
+          "in" : "header",
+          "name" : "X-Channel",
+          "type" : "string",
+          "minLength" : 2,
+          "maxLength" : 25,
+          "required" : true,
+          "pattern" : "^[\\sa-zA-Z0-9,_'\\.\\-]*$",
+          "description" : "Please refer TMS domain 'BusinessTransactionCommunicationChannelCode' for the  list of possible values. Sample Values include\nPOST OFFICE\nINTERNET\nMOBILE\n"
+        }, {
+          "in" : "header",
+          "name" : "X-Channel-Alternate-Id",
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "pattern" : "^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$",
+            "minLength" : 3,
+            "maxLength" : 121
+          },
+          "required" : false,
+          "collectionFormat" : "csv",
+          "description" : "This string holds the channel alternate identifiers. It contains sub-strings that should be populated in a name/value pair format as follows. 'name value' for example [\"MACHINEID 123.123.123.123\", \"CUSTOMERID 1234567891\"]. Name value pair is separated by a blank space character. Name must not contain a space but the value may contain.\n\nThe following values are allowed for name\nCASHIERID\nCUSTOMERID\nEMPLOYEEID\nMACHINEID\nTERMINALID\nUSERID\nFUNCTIONALUNITID\n\nThe values within the identifier should meet the criteria below\n  string max length of 121 and pattern of\n  ^[a-zA-Z0-9,_\\'\\.\\-]+[ ][ a-zA-Z0-9,_\\'\\.\\-]+$\nThis pattern means 2 strings of separated by 1 delimiting space character.\nThe first string is for the type and  the second for the identifier.\nThe second string accepts spaces, but the first don't.\n"
+        }, {
+          "in" : "header",
+          "name" : "X-Virtual-Environment",
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 20,
+          "required" : true,
+          "pattern" : "^[A-Z0-9,\\.\\-]*$",
+          "description" : "Where a project shares environments with other projects, this field is used to create a \"virtual environment\". Consumers can pass this such that the service gateway routes to a project specific version.  The main purpose of this field is to aid testing and production proving.  Once the service is live and proven, it typically no longer serves a purpose.\n\nExample value \"OBIR3-SEPT\".\n"
+        }, {
+          "in" : "header",
+          "name" : "X-Schema-Version",
+          "type" : "string",
+          "enum" : [ "2.0" ],
+          "required" : true,
+          "description" : "This is a way for the consumer to communicate what version of the specification it has. For example a consumer may still operate using v1.0 while the service is at v1.1 (at which point \"1.1\" will be added to the enumeration above, only use numeric values in the enumeration with single quotes).\n\nThis field is used for two purposes\n  - it will allow the service to ensure the consumer receives a compatible response\n  - we can deploy a new minor version alongside an existing minor version, and route the service to either based on this field (and other info).  Based on testing / proving the service will ultimately switch to the final version.\n"
+        }, {
+          "in" : "header",
+          "name" : "X-Journey-Id",
+          "type" : "string",
+          "minLength" : 36,
+          "maxLength" : 36,
+          "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+          "required" : false,
+          "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+        }, {
+          "in" : "header",
+          "name" : "X-Source-System-Id",
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 60,
+          "required" : true,
+          "pattern" : "^[\\sa-zA-Z0-9,_'\\.\\-]*$",
+          "description" : "Please refer TMS domain 'BusinessSystemID' for the  list of possible values. Sample Values include\nDISCOVERY\nBASE24\nCIS\n"
+        }, {
+          "in" : "header",
+          "name" : "X-Create-Date-Time",
+          "type" : "string",
+          "format" : "date-time",
+          "required" : true,
+          "description" : "Time stamp associated with creation of the request message, utilisting the UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+        }, {
+          "in" : "header",
+          "name" : "X-IP-Address",
+          "type" : "string",
+          "minLength" : 7,
+          "maxLength" : 39,
+          "required" : false,
+          "pattern" : "^[a-fA-F0-9:\\.]*$",
+          "description" : "The IPv4/IPv6 address of the caller."
+        }, {
+          "in" : "path",
+          "name" : "accountId",
+          "description" : "Account Id in Account Number and Sort Code format for SAP accounts OR TSYS account Id for retrieving Credit Card locks",
+          "required" : true,
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 28,
+          "pattern" : "^[\\sa-zA-Z\\d\\-\\/]*$"
+        }, {
+          "in" : "query",
+          "name" : "involvedPartyId",
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 10,
+          "pattern" : "^\\d{1,10}$",
+          "description" : "Specifies the unique Identifier used to identify an InvolvedParty. This field is required to retrieve account locks from 'alternate SoR' when credit card system is down.\n"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Account Locks successfully retrieved",
+            "headers" : {
+              "X-Journey-Id" : {
+                "type" : "string",
+                "minLength" : 36,
+                "maxLength" : 36,
+                "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+              },
+              "X-Create-Date-Time" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+              }
+            },
+            "schema" : {
+              "title" : "Locks GET response",
+              "type" : "object",
+              "properties" : {
+                "accountId" : {
+                  "description" : "A unique and immutable identifier used to identify the account resource. This identifier has no meaning to the account owner.",
+                  "type" : "string",
+                  "minLength" : 1,
+                  "maxLength" : 28,
+                  "pattern" : "^[\\sa-zA-Z\\d\\-\\/]*$",
+                  "example" : "123456 87654321"
+                },
+                "isCachedResponse" : {
+                  "description" : "This field indicates TSYS system is down and response returned from alternate SoR if set to true. It will be applicable only for credit cards.",
+                  "type" : "boolean"
+                },
+                "locks" : {
+                  "description" : "Locks",
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "description" : "list of objects",
+                    "properties" : {
+                      "code" : {
+                        "description" : "Account lock code. If credit card system is down then this field will have single digit value",
+                        "type" : "string",
+                        "maxLength" : 6
+                      },
+                      "reason" : {
+                        "description" : "account lock reason",
+                        "type" : "string",
+                        "maxLength" : 6
+                      },
+                      "description" : {
+                        "description" : "account lock description",
+                        "type" : "string",
+                        "maxLength" : 80
+                      },
+                      "cardLostOrStolenDate" : {
+                        "type" : "string",
+                        "pattern" : "^\\d{4}-\\d{2}-\\d{2}$",
+                        "description" : "This reprsents date when credit card was locked because of card might stolen. For example 2017-01-01. This field will be returned only when credit card system is not available. Other than 9999-99-99 date is considered as account is locked. Date pattern is used instead of date format, because 9999-99-99 format is not supported in date format"
+                      }
+                    },
+                    "uniqueItems" : true
+                  }
+                }
+              },
+              "required" : [ "accountId", "locks" ]
+            },
+            "examples" : {
+              "Current Account Response" : {
+                "accountId" : "123456 87654321",
+                "locks" : [ {
+                  "code" : "550",
+                  "description" : "No Withdrawals {Retail}"
+                }, {
+                  "code" : "001019",
+                  "description" : "UN Sanctions Payments"
+                } ]
+              },
+              "Credit Card Response" : {
+                "accountId" : "CC12345678912",
+                "locks" : [ {
+                  "code" : "AA",
+                  "reason" : "Y",
+                  "description" : "Assignor Loan Assumed"
+                }, {
+                  "code" : "AC",
+                  "reason" : "Y",
+                  "description" : "Address Change"
+                } ]
+              },
+              "Credit Card Cached Response" : {
+                "accountId" : "CC12345678912",
+                "isCachedResponse" : true,
+                "locks" : [ {
+                  "code" : "1",
+                  "cardLostOrStolenDate" : "9999-99-99"
+                } ]
+              },
+              "Empty Locks Response" : {
+                "accountId" : "123456 87654321",
+                "locks" : [ ]
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "headers" : {
+              "X-Journey-Id" : {
+                "type" : "string",
+                "minLength" : 36,
+                "maxLength" : 36,
+                "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+              },
+              "X-Create-Date-Time" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Errors"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "403" : {
+            "description" : "Forbidden"
+          },
+          "404" : {
+            "description" : "Not Found",
+            "headers" : {
+              "X-Journey-Id" : {
+                "type" : "string",
+                "minLength" : 36,
+                "maxLength" : 36,
+                "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+              },
+              "X-Create-Date-Time" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Errors"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error",
+            "headers" : {
+              "X-Journey-Id" : {
+                "type" : "string",
+                "minLength" : 36,
+                "maxLength" : 36,
+                "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+              },
+              "X-Create-Date-Time" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Errors"
+            }
+          },
+          "503" : {
+            "description" : "Service Unavailable",
+            "headers" : {
+              "X-Journey-Id" : {
+                "type" : "string",
+                "minLength" : 36,
+                "maxLength" : 36,
+                "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+              },
+              "X-Create-Date-Time" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Errors"
+            }
+          },
+          "504" : {
+            "description" : "Gateway Timeout",
+            "headers" : {
+              "X-Journey-Id" : {
+                "type" : "string",
+                "minLength" : 36,
+                "maxLength" : 36,
+                "pattern" : "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                "description" : "A unique identifier populated by the consumer. It follows the UUID pattern, for example 123e4567-e89b-12d3-a456-426655440000"
+              },
+              "X-Create-Date-Time" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Time stamp associated with creation of the request message. The UTC ISO 8601 Date Time format. For example 2017-01-01T00:00:00 or 2017-01-01T00:00:00.001Z"
+              }
+            },
+            "schema" : {
+              "$ref" : "#/definitions/Errors"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+
+
+CREATE COMPUTE MODULE getSAPResponse_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN 
+		CALL CopyMessageHeaders();
+		DECLARE COUNT INTEGER CARDINALITY(InputRoot.JSON.Data.Item[]);
+		DECLARE I     INTEGER 1; 
+		IF COUNT = 0 THEN  
+			CREATE FIELD OutputRoot.JSON.Data.errors IDENTITY(JSON.Array)errors;
+			SET OutputRoot.JSON.Data.errors.Item[1].code       = 'NEM.ESB.ACTLCK.400.000';   
+			SET OutputRoot.JSON.Data.errors.Item[1].message    = 'Invalid Account ID : ' || Environment.Variables.AccountID || '.';
+			SET OutputRoot.JSON.Data.errors.Item[1].logErrorId = 'c9cd35a4-8cf8-4b9c-90e5-299aea597024';
+
+			SET Environment.Variables.LockFound   			   = 'FALSE';
+			RETURN TRUE;
+		ELSE 
+			SET OutputRoot.JSON.Data.accountId = Environment.Variables.AccountID;   
+			CREATE FIELD OutputRoot.JSON.Data.locks IDENTITY(JSON.Array)locks;  
+			IF EXISTS(InputRoot.JSON.Data.Item[I].code[]) THEN
+				SET Environment.Variables.LockFound   = 'TRUE'; 
+				WHILE I <= COUNT DO  
+					SET OutputRoot.JSON.Data.locks.Item[I].code    = InputRoot.JSON.Data.Item[I].code; 
+					SET OutputRoot.JSON.Data.locks.Item[I].description   = InputRoot.JSON.Data.Item[I].description;
+					SET I = I + 1;
+				END WHILE;	
+			END IF;
+		END IF;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;
